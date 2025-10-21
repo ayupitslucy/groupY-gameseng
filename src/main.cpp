@@ -4,6 +4,8 @@
 int main(int argc, char** argv) {
     sf::RenderWindow window = sf::RenderWindow(sf::VideoMode({ 1920u, 1080u }), "CMake SFML Project");
     window.setFramerateLimit(144);
+    sf::CircleShape shape(100.0f);
+    shape.setFillColor(sf::Color::Green);
 
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
@@ -13,6 +15,7 @@ int main(int argc, char** argv) {
         }
 
         window.clear();
+        window.draw(shape);
         window.display();
     }
     return 0;
