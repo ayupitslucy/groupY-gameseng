@@ -1,6 +1,7 @@
 #include "tile_engine.h"
 #include <iostream>
 #include <fstream>
+#include "renderer.h"
 
 std::unique_ptr<LevelSystem::Tile[]> LevelSystem::tiles;
 int LevelSystem::width;
@@ -89,11 +90,9 @@ void LevelSystem::_build_sprites() {
     }
 }
 
-void LevelSystem::render(sf::RenderWindow& render_window) {
-    // FIXME
+void LevelSystem::render() {
     for (int i = 0; i < LevelSystem::width * LevelSystem::height; i++) {
-        //Renderer::queue(LevelSystem::sprites[i].get());
-        render_window.draw(*LevelSystem::sprites[i].get());
+        Renderer::queue(LevelSystem::sprites[i].get());
     }
 }
 
@@ -130,7 +129,7 @@ LevelSystem::Tile LevelSystem::get_tile_at_grid_coord(sf::Vector2i coord) {
 }
 
 sf::Vector2f LevelSystem::get_screen_coord_at_grid_coord(sf::Vector2i coord) {
-    return sf::Vector2f(coord.x, coord.y) * LevelSystem::tile_size;
+    return sf::Vector2f(static_cast<float>(coord.x), static_cast<float>(coord.y)) * LevelSystem::tile_size;
 }
 
 LevelSystem::Tile LevelSystem::get_tile_at_screen_coord(sf::Vector2f coord) {

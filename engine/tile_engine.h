@@ -10,7 +10,7 @@ public:
     enum Tile { EMPTY, START, END, WALL, ENEMY, WAYPOINT };
 
     static void load_level(const std::string& filepath, float tile_size = 100.0f);  // Loads level from a given file path with optional tile size
-    static void render(sf::RenderWindow& render_window);  // Renders the level to the screen  //TODO: render_window should not be used
+    static void render();  // Renders the level to the screen
 
     static int get_width();  // Returns the tile width of the current level
     static int get_height();  // Returns the tile height of the current level
