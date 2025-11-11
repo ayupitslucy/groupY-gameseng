@@ -15,7 +15,19 @@ add_subdirectory("lib/SFML")
 set(SFML_INCS "lib/SFML/include")
 link_directories("${CMAKE_BINARY_DIR}/lib/SFML/lib")
 
+#### Engine ####
+add_library(engine STATIC engine/tile_engine.cpp)
+target_include_directories(engine PUBLIC engine)
+target_link_libraries(engine sfml-graphics)
+
+add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
+  -E copy_directory
+    "${PROJECT_SOURCE_DIR}/res"
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/res
+)
+
 #### Tower Defence Game
-add_executable(td_game src/main.cpp)
-target_include_directories(td_game PRIVATE ${SFML_INCS})
-target_link_libraries(td_game sfml-graphics)
+add_executable(td_game src/main.cpp "engine/tile_engine.cpp")
+target_include_directories(td_game PRIVATE ${SFML_INCS} .)
+target_link_libraries(td_game engine sfml-graphics)
+add_dependencies(td_game copy_resources)

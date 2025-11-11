@@ -1,11 +1,14 @@
 // The entire contents of this file are temporary
 #include <SFML/Graphics.hpp>
+#include "engine/tile_engine.h"
 
 int main(int argc, char** argv) {
     sf::RenderWindow window = sf::RenderWindow(sf::VideoMode({ 1920u, 1080u }), "CMake SFML Project");
     window.setFramerateLimit(144);
-    sf::CircleShape shape(100.0f);
+    LevelSystem::load_level("res/levels/temp_level.txt", 150.0f);
+    sf::CircleShape shape(75.0f);
     shape.setFillColor(sf::Color::Green);
+    shape.setPosition(LevelSystem::get_start_position());
 
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
@@ -15,6 +18,7 @@ int main(int argc, char** argv) {
         }
 
         window.clear();
+        LevelSystem::render(window);
         window.draw(shape);
         window.display();
     }

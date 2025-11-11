@@ -10,7 +10,7 @@ public:
     enum Tile { EMPTY, START, END, WALL, ENEMY, WAYPOINT };
 
     static void load_level(const std::string& filepath, float tile_size = 100.0f);  // Loads level from a given file path with optional tile size
-    static void render();  // Renders the level to the screen
+    static void render(sf::RenderWindow& render_window);  // Renders the level to the screen  //TODO: render_window should not be used
 
     static int get_width();  // Returns the tile width of the current level
     static int get_height();  // Returns the tile height of the current level
@@ -31,12 +31,13 @@ private:
     static float tile_size;
     static int width;
     static int height;
+    static sf::Vector2f offset;  // Screenspace offset of level, when rendered.
 
     static std::map<Tile, sf::Color> colors;  // Colour to render each tile type
     static sf::Vector2f start_position;  // Starting position
 
-    //static std::vector<std::unique_ptr<sf::RectangleShape>> sprites;  // Array of sfml sprites of each tile
-    //static void build_sprites();  // Generate the sprites array
+    static std::vector<std::unique_ptr<sf::RectangleShape>> sprites;  // Array of sfml sprites of each tile
+    static void _build_sprites();  // Generate the sprites array
 
     LevelSystem() = delete;
     ~LevelSystem() = delete;
