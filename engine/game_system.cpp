@@ -6,11 +6,12 @@ std::shared_ptr<Scene> GameSystem::active_scene;
 void GameSystem::start(unsigned int width, unsigned int height, const std::string& name, const float& time_step) {
     sf::RenderWindow window(sf::VideoMode({ width, height }), name);
     Renderer::initialise(window);
+    sf::Event event;
     while (window.isOpen()) {
         static sf::Clock clock;
         float delta_time = clock.restart().asSeconds();
-        while (const std::optional event = window.pollEvent()) {
-            if (event->is<sf::Event::Closed>()) {
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
                 window.close();
                 clean();
                 return;

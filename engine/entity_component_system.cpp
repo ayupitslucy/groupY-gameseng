@@ -34,11 +34,11 @@ bool Entity::is_for_deletion() const {
     return this->for_deletion;
 }
 
-sf::Angle Entity::get_rotation() const {
+float Entity::get_rotation() const {
     return this->rotation;
 }
 
-void Entity::set_rotation(sf::Angle rotation) {
+void Entity::set_rotation(float rotation) {
     this->rotation = rotation;
 }
 
