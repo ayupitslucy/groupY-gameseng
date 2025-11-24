@@ -19,21 +19,20 @@ void MenuScene::update(const float& delta_time) {
         GameSystem::set_active_scene(Scenes::game);
     }
     Scene::update(delta_time);
+    this->text.setString("Menu Screen (Press space to play)");
+    this->text.setPosition((Parameters::game_width * .5f) - (this->text.getLocalBounds().width * .5f), 0);
 }
 
 void MenuScene::render() {
-    Renderer::queue(text.get());
+    Renderer::queue(&text);
     Scene::render();
 }
 
 void MenuScene::load() {
-    this->font = std::make_unique<sf::Font>();
-    this->font->loadFromFile("res/fonts/RobotoMono-Regular.ttf");
-    this->text = std::make_unique<sf::Text>(*this->font, "Menu Screen (Press space to play)");
-    this->text->setCharacterSize(24);
-    // center horizontally
-    float x = (Parameters::game_width * .5f) - (this->text->getLocalBounds().width * .5f);
-    this->text->setPosition(sf::Vector2f(x, 0));
+    // Set up the text element here!
+    font.loadFromFile("res/fonts/RobotoMono-Regular.ttf");
+    this->text.setFont(font);
+    this->text.setCharacterSize(24);
 }
 
 // ================================ GameScene ================================
@@ -171,7 +170,7 @@ void GameScene::update(const float& delta_time) {
 #endif
 
     // hover preview (example using a preview shape)
-    sf::CircleShape previewShape(LevelSystem::get_tile_size() * 0.5f);
+    previewShape = sf::CircleShape(LevelSystem::get_tile_size() * 0.5f);
     previewShape.setOrigin(sf::Vector2f(previewShape.getRadius(), previewShape.getRadius()));
     previewShape.setPosition(mousePos);
     previewShape.setFillColor(can_place_turret(mousePos) ? sf::Color(0, 255, 0, 120) : sf::Color(255, 0, 0, 120));

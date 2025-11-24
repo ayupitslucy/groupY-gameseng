@@ -31,8 +31,8 @@ public:
     void render() override;
     void load() override;
 private:
-    std::unique_ptr<sf::Text> text;
-    std::unique_ptr<sf::Font> font;
+    sf::Text text;
+    sf::Font font;
 };
 
 class GameScene : public Scene {
@@ -69,4 +69,6 @@ private:
 
     float spawnTimer = 0.f;
     float spawnDelay = 2.f;
+
+    sf::CircleShape previewShape;
 };
