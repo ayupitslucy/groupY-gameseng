@@ -2,23 +2,24 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
+#include "engine/scene.h"
 
 // Forward declarations
 class Tower;
 class Enemy;
 class Projectile;
 
-// ============================================================================
-// BASE SCENE CLASS
-// ============================================================================
-class Scene {
-public:
-    virtual ~Scene() = default;
-
-    virtual void handleEvent(sf::Event& event) = 0;
-    virtual void update(sf::Time delta) = 0;
-    virtual void draw(sf::RenderWindow& window) = 0;
-};
+//// ============================================================================
+//// BASE SCENE CLASS
+//// ============================================================================
+//class Scene {
+//public:
+//    virtual ~Scene() = default;
+//
+//    virtual void handleEvent(sf::Event& event) = 0;
+//    virtual void update(sf::Time delta) = 0;
+//    virtual void draw(sf::RenderWindow& window) = 0;
+//};
 
 // ============================================================================
 // MENU SCENE
@@ -27,9 +28,10 @@ class MenuScene : public Scene {
 public:
     MenuScene();
 
-    void handleEvent(const sf::Event& event) override;
-    void update(sf::Time delta) override;
-    void draw(sf::RenderWindow& window) override;
+    void handleEvent(const sf::Event& event);
+    void update(sf::Time delta);
+    void draw(sf::RenderWindow& window);
+    virtual void load() {}
 
 private:
     sf::Font font;
@@ -43,9 +45,10 @@ class GameScene : public Scene {
 public:
     GameScene();
 
-    void handleEvent(const sf::Event& event) override; // FIXED
-    void update(sf::Time delta) override;
-    void draw(sf::RenderWindow& window) override;
+    void handleEvent(const sf::Event& event); // FIXED
+    void update(sf::Time delta);
+    void draw(sf::RenderWindow& window);
+    virtual void load() {}
 
 private:
     // Gameplay objects
