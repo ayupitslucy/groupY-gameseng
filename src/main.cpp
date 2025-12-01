@@ -1,6 +1,7 @@
 #include "engine/game_system.h"
 #include "game_parameters.h"
 #include "scenes.h"
+#include "sound.h"
 
 int main() {
     Scenes::menu = std::shared_ptr<MenuScene>(new MenuScene());
@@ -9,5 +10,6 @@ int main() {
     Scenes::game->load();
     GameSystem::set_active_scene(Scenes::menu);
     GameSystem::start(Parameters::game_width, Parameters::game_height, "Foodies", Parameters::time_step);
+    initBackgroundMusic();
     return 0;
 }

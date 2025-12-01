@@ -1,8 +1,25 @@
-//while (window.isOpen()) {
+#include "sound.h"
+#include <SFML/Audio.hpp>
+#include <iostream>
 
-	//C:\Users\Hello\Desktop\Year_3\Trimester_1\Games Design\EMPTY FOLDER FOR THIS SHIT\lib\SFML\ffmpeg-whateverbsnameontheend - stream_loop - 1 - i insertnamehere.wav - f wav - | ffplay -
-		// change the path to be not my local system path
-		// then update the names/ffmpeg reference
-		// should work?
-		// will pipe to ffplay using ffmpeg library on the project
-//}
+static sf::Music g_backgroundMusic;
+
+bool initBackgroundMusic()
+{
+    if (!g_backgroundMusic.openFromFile("res/sound/__rhodesmas__music-loop.wav"))
+    {
+        std::cerr << "Error: could not load background music\n";
+        return false;
+    }
+
+   // g_backgroundMusic.setLoop(true);
+   // g_backgroundMusic.setVolume(50.f);
+    g_backgroundMusic.play();
+
+    return true;
+}
+
+void stopBackgroundMusic()
+{
+    g_backgroundMusic.stop();
+}
