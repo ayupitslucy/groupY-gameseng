@@ -1,72 +1,70 @@
 #pragma once
+#include <SFML/Graphics.hpp>
 #include <memory>
-#include "engine/scene.h"
+#include <vector>
 
-struct Scenes {
-    static std::shared_ptr<Scene> menu;
-    static std::shared_ptr<Scene> game;
-};
+// Forward declarations
+class Tower;
+class Enemy;
+class Projectile;
 
-class Button {
+// ============================================================================
+// BASE SCENE CLASS
+// ============================================================================
+class Scene {
 public:
-    sf::RectangleShape shape;
-    bool isHovered = false;
+    virtual ~Scene() = default;
 
-    void update(sf::Vector2f mousePos) {
-        if (shape.getGlobalBounds().contains(mousePos)) {
-            isHovered = true;
-            shape.setFillColor(sf::Color::Yellow); // hover color
-        }
-        else {
-            isHovered = false;
-            shape.setFillColor(sf::Color::White);
-        }
-    }
+    virtual void handleEvent(sf::Event& event) = 0;
+    virtual void update(sf::Time delta) = 0;
+    virtual void draw(sf::RenderWindow& window) = 0;
 };
 
+// ============================================================================
+// MENU SCENE
+// ============================================================================
 class MenuScene : public Scene {
 public:
-    MenuScene() = default;
-    void update(const float& delta_time) override;
-    void render() override;
-    void load() override;
+    MenuScene();
+
+    void handleEvent(const sf::Event& event) override;
+    void update(sf::Time delta) override;
+    void draw(sf::RenderWindow& window) override;
+
 private:
-    std::unique_ptr<sf::Text> text;
-    std::unique_ptr<sf::Font> font;
+    sf::Font font;
+    sf::Text title;
 };
 
+// ============================================================================
+// GAME SCENE
+// ============================================================================
 class GameScene : public Scene {
 public:
-    GameScene() = default;
-    void update(const float& delta_time) override;
-    void render() override;
-    void load() override;
+    GameScene();
+
+    void handleEvent(const sf::Event& event) override; // FIXED
+    void update(sf::Time delta) override;
+    void draw(sf::RenderWindow& window) override;
 
 private:
-    std::shared_ptr<Entity> player;
+    // Gameplay objects
+    std::vector<std::shared_ptr<Tower>> towers;
+    std::vector<std::shared_ptr<Enemy>> enemies;
+    std::vector<std::shared_ptr<Projectile>> projectiles;
 
-    // might be better to declare this in a seperate file
-    struct Tower {
-        sf::CircleShape shape;
-        sf::Vector2f pos;
-    };
+    // Player example
+    sf::CircleShape player;
 
-    struct Enemy {
-        sf::CircleShape shape;
-        std::vector<sf::Vector2f>* path;
-        int pathIndex = 0;
-        float speed = 75.f;
-    };
+    // Tower placement preview
+    sf::CircleShape previewShape;
 
-    std::vector<Tower> towers;
-    std::vector<Enemy> enemies;
+    // Enemy spawn timing
+    sf::Time spawnTimer;
+    sf::Time spawnDelay;
 
-    void spawn_enemy();
-    void update_enemies(float dt);
-
+private:
+    void spawnEnemy();
+    void handleCollisions();
     bool can_place_turret(sf::Vector2f mousePos);
-    void place_turret(sf::Vector2f mousePos);
-
-    float spawnTimer = 0.f;
-    float spawnDelay = 2.f;
 };

@@ -51,7 +51,7 @@ void LevelSystem::load_level(const std::string& filepath, float tile_size) {
         case '+':
             temp_tiles.push_back(WAYPOINT);
             break;
-        case 'n':
+        case 'p':
             temp_tiles.push_back(ENEMY);
             break;
         case '\n':
@@ -66,6 +66,12 @@ void LevelSystem::load_level(const std::string& filepath, float tile_size) {
         }
         x++;
     }
+
+    std::cout << "temp tiles: " << temp_tiles.size()
+        << " expected: " << (width * height)        // check the character count, if its unexpected throw error below
+        << " width=" << width << " height=" << height << "\n";
+
+
     if (temp_tiles.size() != (width * height)) {
         throw std::string("Can't parse level file: ") + filepath;  // The file should end with a newline
     }
@@ -82,12 +88,43 @@ void LevelSystem::_build_sprites() {
     for (int y = 0; y < LevelSystem::get_height(); y++) {
         for (int x = 0; x < LevelSystem::get_width(); x++) {
             std::unique_ptr<sf::RectangleShape> shape = std::make_unique<sf::RectangleShape>();
-            shape->setPosition(get_screen_coord_at_grid_coord({ x, y }));
+            shape->setPosition(get_screen_coord_at_grid_coord({ x, y }) + offset);
             shape->setSize(sf::Vector2f(LevelSystem::tile_size, LevelSystem::tile_size));
             shape->setFillColor(get_color(get_tile_at_grid_coord({ x, y })));
             LevelSystem::sprites.push_back(move(shape));
         }
     }
+}
+
+std::vector<sf::Vector2f> LevelSystem::get_path() {
+    std::vector<sf::Vector2f> path;
+
+    // START
+    auto starts = find_tiles(START);
+    if (starts.size() != 1)
+        throw std::runtime_error("Level must contain exactly ONE START tile.");
+
+    path.push_back(get_screen_coord_at_grid_coord(starts[0]));
+
+    // WAYPOINTS
+    auto wps = find_tiles(WAYPOINT);
+
+    std::sort(wps.begin(), wps.end(), [](auto& a, auto& b) {
+        if (a.y == b.y) return a.x < b.x;
+    return a.y < b.y;
+        });
+
+    for (auto& wp : wps)
+        path.push_back(get_screen_coord_at_grid_coord(wp));
+
+    // END
+    auto ends = find_tiles(END);
+    if (ends.size() != 1)
+        throw std::runtime_error("Level must contain exactly ONE END tile.");
+
+    path.push_back(get_screen_coord_at_grid_coord(ends[0]));
+
+    return path;
 }
 
 void LevelSystem::render() {
@@ -129,7 +166,7 @@ LevelSystem::Tile LevelSystem::get_tile_at_grid_coord(sf::Vector2i coord) {
 }
 
 sf::Vector2f LevelSystem::get_screen_coord_at_grid_coord(sf::Vector2i coord) {
-    return sf::Vector2f(static_cast<float>(coord.x), static_cast<float>(coord.y)) * LevelSystem::tile_size;
+    return sf::Vector2f(coord.x, coord.y) * tile_size + offset;
 }
 
 LevelSystem::Tile LevelSystem::get_tile_at_screen_coord(sf::Vector2f coord) {

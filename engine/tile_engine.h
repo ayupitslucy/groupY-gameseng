@@ -5,9 +5,13 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
+
+
 class LevelSystem {
 public:
     enum Tile { EMPTY, START, END, WALL, ENEMY, WAYPOINT };
+
+    static std::vector<sf::Vector2f> get_path();
 
     static void load_level(const std::string& filepath, float tile_size = 100.0f);  // Loads level from a given file path with optional tile size
     static void render();  // Renders the level to the screen

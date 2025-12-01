@@ -16,7 +16,7 @@ set(SFML_INCS "lib/SFML/include")
 link_directories("${CMAKE_BINARY_DIR}/lib/SFML/lib")
 
 #### Engine ####
-add_library(engine STATIC engine/game_system.cpp engine/scene.cpp engine/entity_manager.cpp engine/entity_component_system.cpp engine/renderer.cpp engine/tile_engine.cpp "src/sound.cpp" "src/tower.cpp")
+add_library(engine STATIC engine/game_system.cpp engine/scene.cpp engine/entity_manager.cpp engine/entity_component_system.cpp engine/renderer.cpp engine/tile_engine.cpp "src/sound.cpp" "src/tower.cpp" "src/tower.h" "src/enemy.h" "src/enemy.cpp" "src/projectile.cpp" "src/projectile.h")
 target_include_directories(engine PUBLIC engine)
 target_link_libraries(engine sfml-graphics)
 
@@ -27,7 +27,7 @@ add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
 )
 
 #### Tower Defence Game
-add_executable(td_game src/main.cpp src/scenes.cpp src/components.cpp "src/sound.cpp" "src/tower.cpp")
+add_executable(td_game src/main.cpp src/scenes.cpp src/components.cpp "src/sound.cpp" "src/tower.cpp" "src/tower.h" "src/enemy.h" "src/enemy.cpp" "src/projectile.cpp" "src/projectile.h")
 target_include_directories(td_game PRIVATE ${SFML_INCS} .)
 target_link_libraries(td_game engine sfml-graphics)
 add_dependencies(td_game copy_resources)

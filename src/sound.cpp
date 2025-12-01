@@ -12,8 +12,8 @@ bool initBackgroundMusic()
         return false;
     }
 
-   // g_backgroundMusic.setLoop(true);
-   // g_backgroundMusic.setVolume(50.f);
+    // g_backgroundMusic.setLoop(true);
+    // g_backgroundMusic.setVolume(50.f);
     g_backgroundMusic.play();
 
     return true;
