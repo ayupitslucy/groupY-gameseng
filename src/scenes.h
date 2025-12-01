@@ -9,18 +9,6 @@ class Tower;
 class Enemy;
 class Projectile;
 
-//// ============================================================================
-//// BASE SCENE CLASS
-//// ============================================================================
-//class Scene {
-//public:
-//    virtual ~Scene() = default;
-//
-//    virtual void handleEvent(sf::Event& event) = 0;
-//    virtual void update(sf::Time delta) = 0;
-//    virtual void draw(sf::RenderWindow& window) = 0;
-//};
-
 // ============================================================================
 // MENU SCENE
 // ============================================================================
