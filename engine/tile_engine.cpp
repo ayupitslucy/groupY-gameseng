@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "renderer.h"
+#include <algorithm>
 
 std::unique_ptr<LevelSystem::Tile[]> LevelSystem::tiles;
 int LevelSystem::width;
