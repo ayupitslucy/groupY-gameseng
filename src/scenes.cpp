@@ -15,7 +15,7 @@
 // MENU SCENE
 // ============================================================================
 MenuScene::MenuScene() {
-    font.loadFromFile("arial.ttf");
+    font.loadFromFile("res/fonts/RobotoMono-Regular.ttf");
     title.setFont(font);
     title.setString("Main Menu");
     title.setCharacterSize(50);
