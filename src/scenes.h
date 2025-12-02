@@ -4,6 +4,11 @@
 #include <vector>
 #include "engine/scene.h"
 
+struct Scenes {
+    static std::shared_ptr<Scene> menu;
+    static std::shared_ptr<Scene> game;
+};
+
 // Forward declarations
 class Tower;
 class Enemy;

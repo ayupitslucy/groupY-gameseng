@@ -11,6 +11,9 @@
 #include <cmath>
 #include <memory>
 
+std::shared_ptr<Scene> Scenes::menu;
+std::shared_ptr<Scene> Scenes::game;
+
 // ============================================================================
 // MENU SCENE
 // ============================================================================
@@ -26,7 +29,7 @@ void MenuScene::handleEvent(const sf::Event& event) {   // FIXED
     if (event.type == sf::Event::KeyPressed &&
         event.key.code == sf::Keyboard::Enter)
     {
-        // TODO: switch to GameScene
+        GameSystem::setActiveScene(Scenes::game);
     }
 }
 

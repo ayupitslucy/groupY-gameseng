@@ -3,6 +3,12 @@
 #include "sound.h"
 
 int main() {
+    Scenes::menu = std::make_shared<MenuScene>();
+    Scenes::menu->load();
+    Scenes::game = std::make_shared<GameScene>();
+    Scenes::game->load();
+    GameSystem::setActiveScene(Scenes::menu);
+
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML Scenes");
     Scene* currentScene = new MenuScene();
 
