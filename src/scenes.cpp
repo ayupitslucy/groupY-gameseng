@@ -6,6 +6,10 @@
 #include "engine/tile_engine.h"
 #include "engine/game_system.h"
 #include "game_parameters.h"
+#include "game_entities.h"
+#include <unordered_set>
+
+#include <iostream>   // for std::cerr
 
 #include <SFML/Graphics.hpp>
 #include <cmath>
@@ -47,6 +51,14 @@ void MenuScene::draw(sf::RenderWindow& window) {
 // ============================================================================
 
 GameScene::GameScene() {
+    try {
+        LevelSystem::load_level("res/levels/temp_level.txt", 100.f);
+    }
+    catch (const std::string& err) {
+        std::cerr << "Failed to load level: " << err << std::endl;
+    }
+    // adjust path and tile size
+
     spawnTimer = sf::Time::Zero;
     spawnDelay = sf::seconds(2.f);
 
@@ -64,6 +76,16 @@ void GameScene::handleEvent(const sf::Event& event) {   // FIXED
         if (event.key.code == sf::Keyboard::Right) player.move(10.f, 0.f);
         if (event.key.code == sf::Keyboard::Up)    player.move(0.f, -10.f);
         if (event.key.code == sf::Keyboard::Down)  player.move(0.f, 10.f);
+    }
+
+    // Place tower
+    if (event.type == sf::Event::MouseButtonPressed &&
+        event.mouseButton.button == sf::Mouse::Left)
+    {
+        sf::Vector2f mousePos = Renderer::get_window().mapPixelToCoords(
+            { event.mouseButton.x, event.mouseButton.y });
+        if (can_place_turret(mousePos))
+            towers.push_back(std::make_shared<Tower>(mousePos, BASIC_TOWER));
     }
 }
 
@@ -86,8 +108,10 @@ void GameScene::update(sf::Time delta) {
 
     // Mouse world position
     sf::RenderWindow& window = Renderer::get_window();
+    if (&window == nullptr) return; // safeguard
     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-    sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
+    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    previewShape.setPosition(mousePos);
 
     // Tower preview
     previewShape.setRadius(LevelSystem::get_tile_size() * 0.5f);
@@ -98,15 +122,11 @@ void GameScene::update(sf::Time delta) {
     previewShape.setFillColor(
         allowed ? sf::Color(0, 255, 0, 120) : sf::Color(255, 0, 0, 120)
     );
-
-    // Place tower
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && allowed) {
-        towers.push_back(std::make_shared<Tower>(mousePos));
-    }
 }
 
 void GameScene::draw(sf::RenderWindow& window) {
     LevelSystem::render();
+    Renderer::render();   // <--- flush all queued tiles
 
     for (auto& t : towers)      t->render(window);
     for (auto& e : enemies)     e->render(window);
@@ -122,9 +142,18 @@ void GameScene::draw(sf::RenderWindow& window) {
 // ============================================================================
 
 void GameScene::spawnEnemy() {
-    auto path = LevelSystem::get_path();
+    EnemyStats stats;
+
+    int r = rand() % 3;
+    switch (r) {
+    case 0: stats = FAST_ENEMY; break;
+    case 1: stats = NORMAL_ENEMY; break;
+    case 2: stats = TANK_ENEMY; break;
+    }
+
+    auto path = LevelSystem::get_path(); // returns Vector2f
     if (!path.empty()) {
-        enemies.push_back(std::make_shared<Enemy>(path, 50.f));
+        enemies.push_back(std::make_shared<Enemy>(path, stats));
     }
 }
 

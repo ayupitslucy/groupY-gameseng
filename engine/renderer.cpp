@@ -17,10 +17,14 @@ void Renderer::queue(const sf::Drawable* sprite) {
 
 void Renderer::render() {
     if (Renderer::render_window == nullptr) {
-        throw("No render window set! ");
+        throw std::runtime_error("No render window set!");
     }
     while (!sprites.empty()) {
-        Renderer::render_window->draw(*sprites.front());
+        const sf::Drawable* d = sprites.front();
+        if (!d) {
+            throw std::runtime_error("Renderer::render(): nullptr in queue");
+        }
+        Renderer::render_window->draw(*d);
         sprites.pop();
     }
 }

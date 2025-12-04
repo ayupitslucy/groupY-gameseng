@@ -40,7 +40,7 @@ private:
     static std::map<Tile, sf::Color> colors;  // Colour to render each tile type
     static sf::Vector2f start_position;  // Starting position
 
-    static std::vector<std::unique_ptr<sf::RectangleShape>> sprites;  // Array of sfml sprites of each tile
+    static std::vector<sf::RectangleShape> sprites;// Array of sfml sprites of each tile
     static void _build_sprites();  // Generate the sprites array
 
     LevelSystem() = delete;

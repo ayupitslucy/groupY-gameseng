@@ -1,79 +1,66 @@
 #include "tower.h"
 #include "enemy.h"
 #include "projectile.h"
+#include "tile_engine.h"
 #include <cmath>
-#include <algorithm>
+#include <memory>
 
-Tower::Tower(sf::Vector2f position) : pos(position) {}
+Tower::Tower(const sf::Vector2f& worldPos, const TowerStats& stats)
+    : stats(stats)
+{
+    // Snap to grid
+    gridPosition.x = int(worldPos.x / LevelSystem::get_tile_size());
+    gridPosition.y = int(worldPos.y / LevelSystem::get_tile_size());
+    position = LevelSystem::get_screen_coord_at_grid_coord(gridPosition);
 
-void Tower::update(
-    float dt,
+    baseShape.setRadius(20.f);
+    baseShape.setOrigin(20.f, 20.f);
+    baseShape.setFillColor(sf::Color::Blue);
+    baseShape.setPosition(position);
+}
+
+void Tower::update(float dt,
     const std::vector<std::shared_ptr<Enemy>>& enemies,
-    std::vector<std::shared_ptr<Projectile>>& projectiles
-) {
+    std::vector<std::shared_ptr<Projectile>>& projectiles)
+{
     fireCooldown -= dt;
 
-    auto target = aimAtEnemy(enemies);
-    if (target) {
-        sf::Vector2f aimDir = computeAimDirection(*target);
+    auto target = findTarget(enemies);
+    if (!target) return;
 
-        if (fireCooldown <= 0.f) {
-            projectiles.push_back(
-                std::make_shared<Projectile>(pos, aimDir * projectileSpeed)
-            );
-            fireCooldown = 1.f / fireRate;
+    sf::Vector2f aim = target->getPosition() - position;
+    float len = std::sqrt(aim.x * aim.x + aim.y * aim.y);
+    if (len == 0.f) return; // safeguard
+    aim /= len;
+
+    if (fireCooldown <= 0.f) {
+        projectiles.push_back(
+            std::make_shared<Projectile>(
+                position,
+                aim * stats.projectileSpeed,
+                stats.projectileDamage
+                )
+        );
+        fireCooldown = 1.f / stats.fireRate;
+    }
+}
+
+std::shared_ptr<Enemy> Tower::findTarget(const std::vector<std::shared_ptr<Enemy>>& enemies) {
+    std::shared_ptr<Enemy> best = nullptr;
+    float closest = stats.range * LevelSystem::get_tile_size();
+
+    for (auto& e : enemies) {
+        sf::Vector2f delta = e->getPosition() - position;
+        float dist = std::sqrt(delta.x * delta.x + delta.y * delta.y);
+
+        if (dist < closest) {
+            closest = dist;
+            best = e;
         }
     }
+    return best;
 }
 
 void Tower::render(sf::RenderWindow& window) {
-    window.draw(sprite);
-}
-
-std::shared_ptr<Enemy> Tower::aimAtEnemy(
-    const std::vector<std::shared_ptr<Enemy>>& enemies
-) {
-    std::shared_ptr<Enemy> target = nullptr;
-    float closestDist = range;
-
-    for (auto& e : enemies) {
-        if (!e) continue;
-
-        sf::Vector2f diff = e->getPosition() - pos;
-        float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
-
-        if (dist <= closestDist) {
-            closestDist = dist;
-            target = e;
-        }
-    }
-    return target;
-}
-
-sf::Vector2f Tower::computeAimDirection(const Enemy& enemy) {
-    sf::Vector2f shooterPos = pos;
-    sf::Vector2f targetPos = enemy.getPosition();
-    sf::Vector2f targetVel = enemy.getVelocity();
-
-    sf::Vector2f dir = targetPos - shooterPos;
-    float a = targetVel.x * targetVel.x + targetVel.y * targetVel.y
-        - projectileSpeed * projectileSpeed;
-    float b = 2.f * (dir.x * targetVel.x + dir.y * targetVel.y);
-    float c = dir.x * dir.x + dir.y * dir.y;
-
-    float disc = b * b - 4 * a * c;
-    if (disc < 0.f) {
-        float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
-        return dir / len;
-    }
-
-    float t1 = (-b + std::sqrt(disc)) / (2.f * a);
-    float t2 = (-b - std::sqrt(disc)) / (2.f * a);
-    float t = (t1 > 0 ? t1 : t2);
-    if (t < 0) t = std::max(t1, t2);
-
-    sf::Vector2f aimPoint = targetPos + targetVel * t;
-    sf::Vector2f aimDir = aimPoint - shooterPos;
-    float len = std::sqrt(aimDir.x * aimDir.x + aimDir.y * aimDir.y);
-    return aimDir / len;
+    window.draw(baseShape);
 }
