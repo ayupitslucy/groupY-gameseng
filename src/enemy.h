@@ -6,6 +6,7 @@ struct EnemyStats {
     int health;
     float speed;
     float armour; // 0.2 = 20% damage reduction
+    float rewardMultiplier = 1.f; // NEW
 };
 
 class Enemy {
@@ -20,12 +21,15 @@ public:
     bool isDead() const { return health <= 0; }
     sf::Vector2f getPosition() const;
 
+    float getRewardMultiplier() const { return rewardMultiplier; }
+
 private:
     std::vector<sf::Vector2f> path;  // screen coordinates
     size_t pathIndex;
     float speed;
     float armour;
     int health;
+    float rewardMultiplier;
 
     sf::CircleShape shape;
 };

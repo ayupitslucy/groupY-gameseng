@@ -4,7 +4,8 @@
 
 Enemy::Enemy(const std::vector<sf::Vector2f>& path, const EnemyStats& stats)
     : path(path), pathIndex(0), speed(stats.speed),
-    armour(stats.armour), health(stats.health)
+    armour(stats.armour), health(stats.health),
+    rewardMultiplier(stats.rewardMultiplier)
 {
     shape.setRadius(20.f);
     shape.setOrigin(20.f, 20.f);

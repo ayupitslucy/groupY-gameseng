@@ -59,6 +59,18 @@ GameScene::GameScene() {
     }
     // adjust path and tile size
 
+    // Load font
+    if (!font.loadFromFile("res/fonts/RobotoMono-Regular.ttf")) {
+        std::cerr << "Failed to load font for money display.\n";
+    }
+
+    // Configure money text
+    moneyText.setFont(font);
+    moneyText.setCharacterSize(24);
+    moneyText.setFillColor(sf::Color::Yellow);
+    moneyText.setPosition(10.f, 10.f);
+    moneyText.setString("Money: " + std::to_string(money));
+
     spawnTimer = sf::Time::Zero;
     spawnDelay = sf::seconds(2.f);
 
@@ -122,6 +134,9 @@ void GameScene::update(sf::Time delta) {
     previewShape.setFillColor(
         allowed ? sf::Color(0, 255, 0, 120) : sf::Color(255, 0, 0, 120)
     );
+
+    // Update money display
+    moneyText.setString("Money: " + std::to_string(money));
 }
 
 void GameScene::draw(sf::RenderWindow& window) {
@@ -134,6 +149,9 @@ void GameScene::draw(sf::RenderWindow& window) {
 
     window.draw(previewShape);
     window.draw(player);
+
+    // Draw money
+    window.draw(moneyText);
 }
 
 
@@ -158,6 +176,8 @@ void GameScene::spawnEnemy() {
 }
 
 void GameScene::handleCollisions() {
+    int baseReward = 100;
+
     for (size_t i = 0; i < projectiles.size(); ) {
         bool hit = false;
 
@@ -166,6 +186,9 @@ void GameScene::handleCollisions() {
             float dist = std::sqrt(d.x * d.x + d.y * d.y);
 
             if (dist < 20.f) {
+                // Use the enemy's reward multiplier
+                money += static_cast<int>(baseReward * enemies[j]->getRewardMultiplier());
+
                 enemies.erase(enemies.begin() + j);
                 hit = true;
                 break;

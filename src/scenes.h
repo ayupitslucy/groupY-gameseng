@@ -60,6 +60,10 @@ private:
     sf::Time spawnDelay;
 
 private:
+    int money = 100;               // Player currency
+    sf::Font font;                 // Font for displaying text
+    sf::Text moneyText;            // Text object
+
     void spawnEnemy();
     void handleCollisions();
     bool can_place_turret(sf::Vector2f mousePos);
