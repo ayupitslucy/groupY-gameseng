@@ -1,5 +1,6 @@
 #include "scenes.h"
 #include "tower.h"
+#include "sound.h"
 #include "enemy.h"
 #include "button.h"
 #include "projectile.h"
@@ -26,6 +27,7 @@ bool menuOpen = false;
 // ============================================================================
 // MENU SCENE
 // ============================================================================
+
 MenuScene::MenuScene() {
     font.loadFromFile("res/fonts/RobotoMono-Regular.ttf");
     title.setFont(font);
@@ -50,7 +52,6 @@ void MenuScene::draw(sf::RenderWindow& window) {
     window.draw(title);
 }
 
-
 // ============================================================================
 // GAME SCENE
 // ============================================================================
@@ -64,6 +65,10 @@ GameScene::GameScene() {
     }
 
     // Load font
+    if (!SoundManager::initBackgroundMusic("res/sound/__rhodesmas__music-loop.wav")) {
+        std::cerr << "Failed to load sound for background music.\n";
+    }
+
     if (!font.loadFromFile("res/fonts/RobotoMono-Regular.ttf")) {
         std::cerr << "Failed to load font for money display.\n";
     }

@@ -1,7 +1,9 @@
 #include "scenes.h"
 #include "game_system.h"
-#include "sound.h"
+//#include <SFML/Audio.hpp>
 #include "renderer.h"
+
+//#include <iostream>
 
 int main() {
     // Create the window first
@@ -17,6 +19,15 @@ int main() {
     Scenes::game->load();
 
     GameSystem::setActiveScene(Scenes::menu);
+
+    //sf::Music music;
+    //if (!music.openFromFile("Media/__rhodesmas__music-loop.wav")) {
+    //    std::cerr << "Failed to load music\n";
+    //    return 1;
+    //}
+    //music.setLoop(true);
+    //music.play();
+
 
     sf::Clock clock;
 
@@ -37,6 +48,5 @@ int main() {
         window.display();
     }
 
-    initBackgroundMusic();
     return 0;
 }
