@@ -60,6 +60,7 @@ private:
     sf::Time spawnDelay;
 
 private:
+    int lives = 20;
     int money = 100;               // Player currency
     sf::Font font;                 // Font for displaying text
     sf::Text moneyText;            // Text object

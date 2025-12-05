@@ -1,6 +1,7 @@
 #include "scenes.h"
 #include "tower.h"
 #include "enemy.h"
+#include "button.h"
 #include "projectile.h"
 #include "engine/renderer.h"
 #include "engine/tile_engine.h"
@@ -17,6 +18,10 @@
 
 std::shared_ptr<Scene> Scenes::menu;
 std::shared_ptr<Scene> Scenes::game;
+
+std::shared_ptr<Button> menuButton;
+std::vector<std::shared_ptr<Button>> towerButtons;
+bool menuOpen = false;
 
 // ============================================================================
 // MENU SCENE
@@ -57,19 +62,16 @@ GameScene::GameScene() {
     catch (const std::string& err) {
         std::cerr << "Failed to load level: " << err << std::endl;
     }
-    // adjust path and tile size
 
     // Load font
     if (!font.loadFromFile("res/fonts/RobotoMono-Regular.ttf")) {
         std::cerr << "Failed to load font for money display.\n";
     }
 
-    // Configure money text
     moneyText.setFont(font);
     moneyText.setCharacterSize(24);
     moneyText.setFillColor(sf::Color::Yellow);
     moneyText.setPosition(10.f, 10.f);
-    moneyText.setString("Money: " + std::to_string(money));
 
     spawnTimer = sf::Time::Zero;
     spawnDelay = sf::seconds(2.f);
@@ -80,9 +82,36 @@ GameScene::GameScene() {
     player.setPosition(200.f, 200.f);
 
     previewShape.setFillColor(sf::Color(255, 0, 0, 120));
+
+    // MENU BUTTON
+    menuButton = std::make_shared<Button>(
+        sf::Vector2f(10.f, 50.f), sf::Vector2f(120.f, 40.f),
+        "Menu", font,
+        [this]() { menuOpen = !menuOpen; }
+    );
+
+    // --- CREATE TOWER BUTTONS ONCE ---
+    towerButtons.clear();
+
+    towerButtons.push_back(std::make_shared<Button>(
+        sf::Vector2f(10.f, 100.f), sf::Vector2f(120.f, 40.f),
+        "Basic Tower", font,
+        [this]() {
+            sf::Vector2f mousePos =
+            Renderer::get_window().mapPixelToCoords(
+                sf::Mouse::getPosition(Renderer::get_window()));
+
+    if (can_place_turret(mousePos) && money >= 50) {
+        towers.push_back(std::make_shared<Tower>(mousePos, BASIC_TOWER));
+        money -= 50;
+    }
+        }
+    ));
 }
 
-void GameScene::handleEvent(const sf::Event& event) {   // FIXED
+void GameScene::handleEvent(const sf::Event& event) {
+
+    // Player movement
     if (event.type == sf::Event::KeyPressed) {
         if (event.key.code == sf::Keyboard::Left)  player.move(-10.f, 0.f);
         if (event.key.code == sf::Keyboard::Right) player.move(10.f, 0.f);
@@ -90,14 +119,26 @@ void GameScene::handleEvent(const sf::Event& event) {   // FIXED
         if (event.key.code == sf::Keyboard::Down)  player.move(0.f, 10.f);
     }
 
-    // Place tower
+    // Place tower by clicking the world (no button)
     if (event.type == sf::Event::MouseButtonPressed &&
         event.mouseButton.button == sf::Mouse::Left)
     {
-        sf::Vector2f mousePos = Renderer::get_window().mapPixelToCoords(
-            { event.mouseButton.x, event.mouseButton.y });
-        if (can_place_turret(mousePos))
+        sf::Vector2f mousePos =
+            Renderer::get_window().mapPixelToCoords(
+                sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+        if (can_place_turret(mousePos)) {
             towers.push_back(std::make_shared<Tower>(mousePos, BASIC_TOWER));
+        }
+    }
+
+    // Handle menu button clicks
+    menuButton->handleEvent(event, Renderer::get_window());
+
+    // Handle tower button clicks *only when menu is open*
+    if (menuOpen) {
+        for (auto& btn : towerButtons)
+            btn->handleEvent(event, Renderer::get_window());
     }
 }
 
@@ -152,6 +193,12 @@ void GameScene::draw(sf::RenderWindow& window) {
 
     // Draw money
     window.draw(moneyText);
+
+    menuButton->render(window);
+    if (menuOpen) {
+        for (auto& btn : towerButtons)
+            btn->render(window);
+    }
 }
 
 
