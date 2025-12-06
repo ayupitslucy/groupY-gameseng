@@ -1,6 +1,7 @@
 #include "game_system.h"
 
 std::shared_ptr<Scene> GameSystem::active_scene = nullptr;
+bool GameSystem::quitRequested = false;
 
 void GameSystem::setActiveScene(std::shared_ptr<Scene> scene) {
     if (active_scene) {
@@ -28,4 +29,12 @@ void GameSystem::draw(sf::RenderWindow& window) {
     if (active_scene) {
         active_scene->draw(window);
     }
+}
+
+void GameSystem::requestQuit() {
+    quitRequested = true;
+}
+
+bool GameSystem::shouldQuit() {
+    return quitRequested;
 }

@@ -7,7 +7,7 @@
 
 int main() {
     // Create the window first
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML Scenes");
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Foodies");
 
     // Initialise renderer immediately
     Renderer::initialise(window);
@@ -31,7 +31,7 @@ int main() {
 
     sf::Clock clock;
 
-    while (window.isOpen()) {
+    while (window.isOpen() && !GameSystem::shouldQuit()) {
         sf::Time dt = clock.restart();
 
         sf::Event event;
