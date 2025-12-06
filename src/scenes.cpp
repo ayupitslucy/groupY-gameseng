@@ -101,6 +101,10 @@ void GameScene::load() {
 // -------------------------
 // Initialize tower buttons
 // -------------------------
+
+std::vector<std::shared_ptr<Button>> towerButtons;
+std::vector<sf::Texture> towerTextures; // Keep textures alive
+
 void GameScene::initTowerButtons() {
     towerButtons.clear();
 
@@ -108,15 +112,13 @@ void GameScene::initTowerButtons() {
         std::string name;
         const TowerStats* stats;
         int cost;
-
-        TowerButtonInfo(const std::string& n, const TowerStats* s, int c)
-            : name(n), stats(s), cost(c) {}
+        std::string iconPath;
     };
 
     std::vector<TowerButtonInfo> towerInfos{
-        {"Basic Tower", &BASIC_TOWER, 50},
-        {"Cannon Tower", &CANNON_TOWER, 100},
-        {"Sniper Tower", &SNIPER_TOWER, 150}
+        {"Basic Tower", &BASIC_TOWER, 50, "res/icons_png/yellow_tower.png"},
+        {"Cannon Tower", &CANNON_TOWER, 100, "res/icons_png/green_tower.png"},
+        {"Sniper Tower", &SNIPER_TOWER, 150, "res/icons_png/blue_tower.png"}
     };
 
     const float buttonWidth = 120.f;
@@ -136,18 +138,21 @@ void GameScene::initTowerButtons() {
         const TowerStats* statsPtr = towerInfos[i].stats;
         int cost = towerInfos[i].cost;
         std::string label = towerInfos[i].name;
+        std::string iconPath = towerInfos[i].iconPath;
 
+        // Explicitly create std::string from icon path to avoid type confusion
         towerButtons.push_back(std::make_shared<Button>(
             pos,
             sf::Vector2f(buttonWidth, buttonHeight),
             label,
-            moneyFont,
+            moneyFont,  // must be non-const sf::Font
             [this, statsPtr, cost]() {
                 selectedTower = statsPtr;
         selectedTowerCost = cost;
         towerMenuOpen = false;
-            }
-        ));
+            },
+            std::string(iconPath)  // wrap const char* into std::string explicitly
+                ));
     }
 }
 
