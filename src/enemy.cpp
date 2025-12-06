@@ -20,7 +20,7 @@ bool Enemy::loadTextures()
         anyLoaded = true;
     }
     else {
-        std::cerr << "[WARN] fast texture failed to load (res/enemies/fast.png)\n";
+        std::cerr << "[WARN] fast texture failed to load (res/icons_png/toast.png)\n";
     }
 
     if (normalTex.loadFromFile("res/icons_png/egg.png")) {
@@ -28,7 +28,7 @@ bool Enemy::loadTextures()
         anyLoaded = true;
     }
     else {
-        std::cerr << "[WARN] normal texture failed to load (res/enemies/normal.png)\n";
+        std::cerr << "[WARN] normal texture failed to load (res/icons_png/egg.png)\n";
     }
 
     if (tankTex.loadFromFile("res/icons_png/bacon.png")) {
@@ -36,7 +36,7 @@ bool Enemy::loadTextures()
         anyLoaded = true;
     }
     else {
-        std::cerr << "[WARN] tank texture failed to load (res/enemies/tank.png)\n";
+        std::cerr << "[WARN] tank texture failed to load (res/icons_png/bacon.png)\n";
     }
 
     return anyLoaded;
