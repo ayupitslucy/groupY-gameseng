@@ -1,6 +1,7 @@
 #include "tower.h"
 #include "enemy.h"
 #include "projectile.h"
+#include "sound.h"
 #include "tile_engine.h"
 #include <cmath>
 #include <memory>
@@ -41,6 +42,7 @@ void Tower::update(float dt,
                 stats.projectileDamage
                 )
         );
+        SoundManager::playSound("tower_fire", 70.f);
         fireCooldown = 1.f / stats.fireRate;
     }
 }

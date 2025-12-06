@@ -1,4 +1,5 @@
 #include "enemy.h"
+#include "sound.h"
 #include "game_entities.h"   // provides FAST_ENEMY etc.
 #include <iostream>
 #include <cmath>
@@ -112,6 +113,8 @@ void Enemy::update(float dt)
 }
 
 bool Enemy::takeDamage(int dmg) {
+    SoundManager::playSound("enemy_hit", 60.f);
+
     int effective = dmg - int(dmg * armour);
     if (effective < 1) effective = 1;
     health -= effective;

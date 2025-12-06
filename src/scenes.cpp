@@ -65,6 +65,10 @@ void GameScene::load() {
     // Background music
     SoundManager::initBackgroundMusic("res/sound/__rhodesmas__music-loop.wav");
 
+    SoundManager::loadSound("tower_fire", "res/sound/__snapper4298__hit4.wav");
+    SoundManager::loadSound("enemy_hit", "res/sound/__theplax__pop-2.wav");
+    SoundManager::loadSound("button_click", "res/sound/__designerschoice__place.wav");
+
     // Load font
     if (!moneyFont.loadFromFile("res/fonts/RobotoMono-Regular.ttf")) {
         std::cerr << "Failed to load font for money display.\n";
@@ -290,6 +294,8 @@ void GameScene::handleEvent(const sf::Event& event) {
 void GameScene::update(sf::Time delta) {
     float dt = delta.asSeconds();
     spawnTimer += delta;
+
+    SoundManager::update();
 
     if (spawnTimer >= spawnDelay) {
         spawnTimer = sf::Time::Zero;
