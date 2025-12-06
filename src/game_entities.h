@@ -9,6 +9,7 @@
 extern const TowerStats BASIC_TOWER;
 extern const TowerStats SNIPER_TOWER;
 extern const TowerStats CANNON_TOWER;
+extern const TowerStats LASER_TOWER;
 
 // ==========================
 // Enemy types

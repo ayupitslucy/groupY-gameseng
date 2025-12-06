@@ -117,8 +117,9 @@ void GameScene::initTowerButtons() {
 
     std::vector<TowerButtonInfo> towerInfos{
         {"Basic Tower", &BASIC_TOWER, 50, "res/icons_png/yellow_tower.png"},
-        {"Cannon Tower", &CANNON_TOWER, 100, "res/icons_png/green_tower.png"},
-        {"Sniper Tower", &SNIPER_TOWER, 150, "res/icons_png/blue_tower.png"}
+        {"Sniper Tower", &SNIPER_TOWER, 80, "res/icons_png/green_tower.png"},
+        {"Cannon Tower", &CANNON_TOWER, 100, "res/icons_png/blue_tower.png"},
+        {"Laser Tower", &LASER_TOWER, 150, "res/icons_png/grey_tower.png"}
     };
 
     const float buttonWidth = 120.f;
@@ -189,23 +190,65 @@ void GameScene::spawnEnemy() {
 void GameScene::handleCollisions() {
     int baseReward = 100;
 
-    for (size_t i = 0; i < projectiles.size(); ) {
-        bool hit = false;
+    // indices to remove after checking everything
+    std::vector<size_t> removeProjectiles;
+    std::vector<size_t> removeEnemies;
+
+    // For each projectile, test collision against all enemies
+    for (size_t i = 0; i < projectiles.size(); ++i) {
+        if (!projectiles[i]) continue;
+
+        // Use real projectile damage
+        int projDamage = projectiles[i]->getDamage();
+
+        bool projectileConsumed = false;
 
         for (size_t j = 0; j < enemies.size(); ++j) {
-            sf::Vector2f d = enemies[j]->getPosition() - projectiles[i]->getPosition();
-            float dist = std::sqrt(d.x * d.x + d.y * d.y);
+            if (!enemies[j]) continue;
 
-            if (dist < 20.f) {
-                money += static_cast<int>(baseReward * enemies[j]->getRewardMultiplier());
-                enemies.erase(enemies.begin() + j);
-                hit = true;
-                break;
+            // If already dead, skip
+            if (enemies[j]->isDead()) continue;
+
+            sf::Vector2f d = enemies[j]->getPosition() - projectiles[i]->getPosition();
+            float dist2 = d.x * d.x + d.y * d.y;
+
+            // collision radius: enemy fallback radius (20) + projectile radius (5) = 25
+            const float collisionRadius = 25.f;
+            if (dist2 < collisionRadius * collisionRadius) {
+                // Apply damage and see if enemy died
+                bool died = enemies[j]->takeDamage(projDamage);
+
+                // If enemy died, award money and mark for removal
+                if (died) {
+                    money += static_cast<int>(baseReward * enemies[j]->getRewardMultiplier());
+                    removeEnemies.push_back(j);
+                }
+
+                // consume projectile on hit (change logic if you want piercing)
+                projectileConsumed = true;
+                break; // projectile hit an enemy; stop checking more enemies
             }
         }
 
-        if (hit) projectiles.erase(projectiles.begin() + i);
-        else     ++i;
+        if (projectileConsumed) removeProjectiles.push_back(i);
+    }
+
+    // Remove projectiles in descending order of index
+    if (!removeProjectiles.empty()) {
+        std::sort(removeProjectiles.begin(), removeProjectiles.end(), std::greater<size_t>());
+        removeProjectiles.erase(std::unique(removeProjectiles.begin(), removeProjectiles.end()), removeProjectiles.end());
+        for (size_t idx : removeProjectiles) {
+            if (idx < projectiles.size()) projectiles.erase(projectiles.begin() + idx);
+        }
+    }
+
+    // Remove enemies in descending order of index
+    if (!removeEnemies.empty()) {
+        std::sort(removeEnemies.begin(), removeEnemies.end(), std::greater<size_t>());
+        removeEnemies.erase(std::unique(removeEnemies.begin(), removeEnemies.end()), removeEnemies.end());
+        for (size_t idx : removeEnemies) {
+            if (idx < enemies.size()) enemies.erase(enemies.begin() + idx);
+        }
     }
 }
 

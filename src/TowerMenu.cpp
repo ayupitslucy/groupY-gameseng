@@ -8,8 +8,9 @@ TowerMenu::TowerMenu() {
 
     towerInfos = {
         { "Basic Tower",  &BASIC_TOWER,  50 },
-        { "Sniper Tower", &SNIPER_TOWER, 100 },
-        { "Cannon Tower", &CANNON_TOWER, 150 }
+        { "Sniper Tower", &SNIPER_TOWER, 80 },
+        { "Cannon Tower", &CANNON_TOWER, 100 },
+        { "Laser Tower", &LASER_TOWER, 150 }
     };
 
     for (size_t i = 0; i < towerInfos.size(); ++i) {

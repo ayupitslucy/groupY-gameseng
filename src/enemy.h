@@ -15,7 +15,7 @@ public:
 
     void update(float dt);
     void render(sf::RenderWindow& window);
-    void takeDamage(int dmg);
+    bool takeDamage(int dmg);
 
     bool isDead() const { return health <= 0; }
     sf::Vector2f getPosition() const;

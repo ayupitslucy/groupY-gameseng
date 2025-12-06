@@ -111,14 +111,15 @@ void Enemy::update(float dt)
     }
 }
 
-void Enemy::takeDamage(int dmg)
-{
+bool Enemy::takeDamage(int dmg) {
     int effective = dmg - int(dmg * armour);
     if (effective < 1) effective = 1;
     health -= effective;
-
-    if (!useSprite) fallbackShape.setFillColor(sf::Color(255, 200, 0));
+    
+        if (!useSprite) fallbackShape.setFillColor(sf::Color(255, 200, 0));
     else sprite.setColor(sf::Color(255, 200, 200));
+            // return true if now dead
+        return (health <= 0);
 }
 
 void Enemy::render(sf::RenderWindow& window)
