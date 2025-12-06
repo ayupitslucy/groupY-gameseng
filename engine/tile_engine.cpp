@@ -172,6 +172,10 @@ sf::Vector2f LevelSystem::get_screen_coord_at_grid_coord(sf::Vector2i coord) {
     return sf::Vector2f(coord.x, coord.y) * tile_size + offset;
 }
 
+sf::Vector2f LevelSystem::get_screen_coord_center_at_grid_coord(sf::Vector2i coord) {
+    return get_screen_coord_at_grid_coord(coord) + sf::Vector2f(tile_size / 2.f, tile_size / 2.f);
+}
+
 LevelSystem::Tile LevelSystem::get_tile_at_screen_coord(sf::Vector2f coord) {
     sf::Vector2f offset_coord = coord - LevelSystem::offset;
     if (offset_coord.x < 0 || offset_coord.y < 0) {

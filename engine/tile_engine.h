@@ -25,6 +25,7 @@ public:
 
     static Tile get_tile_at_grid_coord(sf::Vector2i coord);  // Returns the tile type at a given grid coordinate
     static sf::Vector2f get_screen_coord_at_grid_coord(sf::Vector2i coord);  // Returns the screenspace coordinate of a given grid coordinate
+    static sf::Vector2f get_screen_coord_center_at_grid_coord(sf::Vector2i coord);
     static Tile get_tile_at_screen_coord(sf::Vector2f coord);  // Returns the tile type at a given screenspace pos
 
     static sf::Vector2f get_start_position();  //  Returns the screenspace coordinate of starting tile
