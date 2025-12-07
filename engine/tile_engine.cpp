@@ -3,6 +3,7 @@
 #include <fstream>
 #include "renderer.h"
 #include <algorithm>
+#include <queue>
 
 std::unique_ptr<LevelSystem::Tile[]> LevelSystem::tiles;
 int LevelSystem::width;
@@ -10,127 +11,197 @@ int LevelSystem::height;
 sf::Vector2f LevelSystem::offset(0.0f, 0.0f);  // FIXME?
 
 float LevelSystem::tile_size(100.f);
-std::vector<std::unique_ptr<sf::RectangleShape>> LevelSystem::sprites;
+std::vector<sf::RectangleShape> LevelSystem::sprites;
 
 std::map<LevelSystem::Tile, sf::Color> LevelSystem::colors{ {WALL, sf::Color::White}, {END, sf::Color::Red} };
 sf::Vector2f LevelSystem::start_position;
 
-void LevelSystem::load_level(const std::string& filepath, float tile_size) {
-    LevelSystem::tile_size = tile_size;
-    int width = 0, height = 0;
-    std::string buffer;
+void LevelSystem::load_level(const std::string& filepath, float tsize) {
+    tile_size = tsize;
 
-    // Load in file to buffer
     std::ifstream fh(filepath);
-    if (fh.good()) {
-        buffer.assign(
-            (std::istreambuf_iterator<char>(fh)),
-            (std::istreambuf_iterator<char>())
-        );
-    } else {
-        throw std::string("Couldn't open level file: ") + filepath;
+    if (!fh.is_open()) {
+        throw std::runtime_error("Couldn't open level file: " + filepath);
     }
-    int x = 0;
 
+    std::vector<std::string> lines;
+    std::string line;
+
+    while (std::getline(fh, line)) {
+        // Strip CR on Windows
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
+
+        if (!line.empty())
+            lines.push_back(line);
+    }
+
+    if (lines.empty())
+        throw std::runtime_error("Level file is empty.");
+
+    height = lines.size();
+    width = lines[0].size();
+
+    // Validate all rows same width
+    for (auto& row : lines)
+        if (row.size() != width)
+            throw std::runtime_error("Level rows have inconsistent width in file: " + filepath);
+
+    // Fill tiles
     std::vector<Tile> temp_tiles;
-    for (int i = 0; i < buffer.size(); i++) {
-        const char tile = buffer[i];
-        switch (tile) {
-        case 'w':
-            temp_tiles.push_back(WALL);
-            break;
-        case 's':
-            temp_tiles.push_back(START);
-            LevelSystem::start_position = LevelSystem::get_screen_coord_at_grid_coord({ x, height });
-            break;
-        case 'e':
-            temp_tiles.push_back(END);
-            break;
-        case ' ':
-            temp_tiles.push_back(EMPTY);
-            break;
-        case '+':
-            temp_tiles.push_back(WAYPOINT);
-            break;
-        case 'p':
-            temp_tiles.push_back(ENEMY);
-            break;
-        case '\n':
-            if (width == 0) {  // If we haven't written width yet
-                width = i;  // Set width
+    temp_tiles.reserve(width * height);
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+
+            char tile = lines[y][x];
+            Tile t = EMPTY;
+
+            switch (tile) {
+            case 'w': t = WALL; break;
+            case '+': t = WAYPOINT; break;
+            case 's': t = START; break;
+            case 'e': t = END; break;
+            case 'p': t = ENEMY; break;
+            case ' ': t = EMPTY; break;
+            default:
+                std::cout << "Unknown tile '" << tile << "'\n";
             }
-            x = -1;  // Gets increment to start at index 0 after switch
-            height++;
-            break;
-        default:
-            std::cout << "Don't know what tile type \"" << tile << "\" is" << std::endl;
+
+            if (t == START)
+                start_position = get_screen_coord_at_grid_coord({ x, y });
+
+            temp_tiles.push_back(t);
         }
-        x++;
     }
 
-    std::cout << "temp tiles: " << temp_tiles.size()
-        << " expected: " << (width * height)        // check the character count, if its unexpected throw error below
-        << " width=" << width << " height=" << height << "\n";
+    tiles = std::make_unique<Tile[]>(width * height);
+    std::copy(temp_tiles.begin(), temp_tiles.end(), &tiles[0]);
 
+    std::cout << "Loaded " << filepath << " (" << width << "x" << height << ")\n";
 
-    if (temp_tiles.size() != (width * height)) {
-        throw std::string("Can't parse level file: ") + filepath;  // The file should end with a newline
-    }
-    LevelSystem::tiles = std::make_unique<Tile[]>(width * height);
-    LevelSystem::width = width;  // Set static class vars
-    LevelSystem::height = height;
-    std::copy(temp_tiles.begin(), temp_tiles.end(), &LevelSystem::tiles[0]);
-    std::cout << "Level " << filepath << " Loaded. " << width << "x" << height << std::endl;
-    LevelSystem::_build_sprites();
+    _build_sprites();
 }
 
 void LevelSystem::_build_sprites() {
-    LevelSystem::sprites.clear();
-    for (int y = 0; y < LevelSystem::get_height(); y++) {
-        for (int x = 0; x < LevelSystem::get_width(); x++) {
-            std::unique_ptr<sf::RectangleShape> shape = std::make_unique<sf::RectangleShape>();
-            shape->setPosition(get_screen_coord_at_grid_coord({ x, y }) + offset);
-            shape->setSize(sf::Vector2f(LevelSystem::tile_size, LevelSystem::tile_size));
-            shape->setFillColor(get_color(get_tile_at_grid_coord({ x, y })));
-            LevelSystem::sprites.push_back(move(shape));
+    sprites.clear();
+    sprites.reserve(width * height);
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            sf::RectangleShape tile;
+
+            tile.setSize({ tile_size, tile_size });
+            tile.setPosition(get_screen_coord_at_grid_coord({ x, y }));
+            tile.setFillColor(LevelSystem::get_color(LevelSystem::get_tile_at_grid_coord({ x, y })));
+
+            sprites.push_back(tile);
         }
     }
 }
 
 std::vector<sf::Vector2f> LevelSystem::get_path() {
-    std::vector<sf::Vector2f> path;
-
-    // START
+    //  Locate START and END
     auto starts = find_tiles(START);
+    auto ends   = find_tiles(END);
+
     if (starts.size() != 1)
         throw std::runtime_error("Level must contain exactly ONE START tile.");
-
-    path.push_back(get_screen_coord_at_grid_coord(starts[0]));
-
-    // WAYPOINTS
-    auto wps = find_tiles(WAYPOINT);
-
-    std::sort(wps.begin(), wps.end(), [](auto& a, auto& b) {
-        if (a.y == b.y) return a.x < b.x;
-    return a.y < b.y;
-        });
-
-    for (auto& wp : wps)
-        path.push_back(get_screen_coord_at_grid_coord(wp));
-
-    // END
-    auto ends = find_tiles(END);
     if (ends.size() != 1)
         throw std::runtime_error("Level must contain exactly ONE END tile.");
 
-    path.push_back(get_screen_coord_at_grid_coord(ends[0]));
+    sf::Vector2i start = starts[0];
+    sf::Vector2i goal  = ends[0];
+
+    const int w = width;
+    const int h = height;
+
+    auto index = [w](sf::Vector2i p) {
+        return p.y * w + p.x;
+    };
+
+    //  Breadth First search setup
+    std::vector<int> prev(w * h, -1);   // store predecessor index
+    std::queue<sf::Vector2i> q;
+
+    auto inBounds = [w, h](sf::Vector2i p) {
+        return p.x >= 0 && p.x < w && p.y >= 0 && p.y < h;
+    };
+
+    auto isWalkable = [](Tile t) {
+        return t == EMPTY || t == START || t == END || t == WAYPOINT;
+    };
+
+    q.push(start);
+    prev[index(start)] = index(start);   // mark as visited with self
+
+    const sf::Vector2i dirs[4] = {
+        { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }
+    };
+
+    bool found = false;
+
+    // BFS loop
+    while (!q.empty() && !found) {
+        sf::Vector2i cur = q.front();
+        q.pop();
+
+        for (auto d : dirs) {
+            sf::Vector2i nxt = cur + d;
+
+            if (!inBounds(nxt))
+                continue;
+
+            if (!isWalkable(get_tile_at_grid_coord(nxt)))
+                continue;
+
+            int ni = index(nxt);
+            if (prev[ni] != -1)
+                continue;   // already visited
+
+            prev[ni] = index(cur);
+
+            if (nxt == goal) {
+                found = true;
+                break;
+            }
+
+            q.push(nxt);
+        }
+    }
+
+    if (!found) {
+        throw std::runtime_error("No path from START to END in level!");
+    }
+
+    // Reconstruct grid path from END to START
+    std::vector<sf::Vector2i> gridPath;
+    sf::Vector2i cur = goal;
+    int curIdx = index(cur);
+
+    while (true) {
+        gridPath.push_back(cur);
+        if (cur == start) break;
+
+        curIdx = prev[curIdx];
+        cur = { curIdx % w, curIdx / w };
+    }
+
+    std::reverse(gridPath.begin(), gridPath.end());
+
+    // Convert grid coords - screen coords (centre of each tile)
+    std::vector<sf::Vector2f> path;
+    path.reserve(gridPath.size());
+    for (auto& p : gridPath) {
+        path.push_back(get_screen_coord_center_at_grid_coord(p));
+    }
 
     return path;
 }
 
 void LevelSystem::render() {
-    for (int i = 0; i < LevelSystem::width * LevelSystem::height; i++) {
-        Renderer::queue(LevelSystem::sprites[i].get());
+    for (auto& sprite : sprites) {
+        Renderer::queue(&sprite);   // SAFE! Sprite exists for whole frame.
     }
 }
 
@@ -168,6 +239,10 @@ LevelSystem::Tile LevelSystem::get_tile_at_grid_coord(sf::Vector2i coord) {
 
 sf::Vector2f LevelSystem::get_screen_coord_at_grid_coord(sf::Vector2i coord) {
     return sf::Vector2f(coord.x, coord.y) * tile_size + offset;
+}
+
+sf::Vector2f LevelSystem::get_screen_coord_center_at_grid_coord(sf::Vector2i coord) {
+    return get_screen_coord_at_grid_coord(coord) + sf::Vector2f(tile_size / 2.f, tile_size / 2.f);
 }
 
 LevelSystem::Tile LevelSystem::get_tile_at_screen_coord(sf::Vector2f coord) {

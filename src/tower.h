@@ -3,15 +3,22 @@
 #include <vector>
 #include <memory>
 
-class Enemy;
+struct TowerStats {
+    float range;        // in tiles
+    float fireRate;     // shots per second
+    int projectileDamage;
+    float projectileSpeed;
+};
+
+class Enemy; // forward declare
 class Projectile;
 
 class Tower {
 public:
-    Tower(sf::Vector2f position);
+    // Accept either grid or world position
+    Tower(const sf::Vector2f& worldPos, const TowerStats& stats);
 
-    void update(
-        float dt,
+    void update(float dt,
         const std::vector<std::shared_ptr<Enemy>>& enemies,
         std::vector<std::shared_ptr<Projectile>>& projectiles
     );
@@ -19,17 +26,12 @@ public:
     void render(sf::RenderWindow& window);
 
 private:
-    sf::Vector2f pos;
-    sf::Sprite sprite;
-
+    sf::Vector2i gridPosition; // snapped to LevelSystem grid
+    sf::Vector2f position;     // actual screen position
+    TowerStats stats;
     float fireCooldown = 0.f;
-    float fireRate = 1.f;
-    float projectileSpeed = 300.f;
-    float range = 200.f;
 
-    std::shared_ptr<Enemy> aimAtEnemy(
-        const std::vector<std::shared_ptr<Enemy>>& enemies
-    );
+    sf::CircleShape baseShape;
 
-    sf::Vector2f computeAimDirection(const Enemy& enemy);
+    std::shared_ptr<Enemy> findTarget(const std::vector<std::shared_ptr<Enemy>>& enemies);
 };

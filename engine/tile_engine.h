@@ -25,6 +25,7 @@ public:
 
     static Tile get_tile_at_grid_coord(sf::Vector2i coord);  // Returns the tile type at a given grid coordinate
     static sf::Vector2f get_screen_coord_at_grid_coord(sf::Vector2i coord);  // Returns the screenspace coordinate of a given grid coordinate
+    static sf::Vector2f get_screen_coord_center_at_grid_coord(sf::Vector2i coord);
     static Tile get_tile_at_screen_coord(sf::Vector2f coord);  // Returns the tile type at a given screenspace pos
 
     static sf::Vector2f get_start_position();  //  Returns the screenspace coordinate of starting tile
@@ -40,7 +41,7 @@ private:
     static std::map<Tile, sf::Color> colors;  // Colour to render each tile type
     static sf::Vector2f start_position;  // Starting position
 
-    static std::vector<std::unique_ptr<sf::RectangleShape>> sprites;  // Array of sfml sprites of each tile
+    static std::vector<sf::RectangleShape> sprites;// Array of sfml sprites of each tile
     static void _build_sprites();  // Generate the sprites array
 
     LevelSystem() = delete;

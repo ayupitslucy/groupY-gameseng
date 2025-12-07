@@ -11,6 +11,10 @@ public:
     static void update(sf::Time dt);
     static void draw(sf::RenderWindow& window);
 
+    static void requestQuit();
+    static bool shouldQuit();
+
 private:
     static std::shared_ptr<Scene> active_scene;
+    static bool quitRequested;
 };

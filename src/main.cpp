@@ -1,14 +1,37 @@
 #include "scenes.h"
 #include "game_system.h"
-#include "sound.h"
+//#include <SFML/Audio.hpp>
+#include "renderer.h"
+
+//#include <iostream>
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML Scenes");
-    Scene* currentScene = new MenuScene();
+    // Create the window first
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Foodies");
+
+    // Initialise renderer immediately
+    Renderer::initialise(window);
+
+    // Create scenes (ok to create before or after as long as Renderer is initialised
+    Scenes::menu = std::make_shared<MenuScene>();
+    Scenes::menu->load();
+    Scenes::game = std::make_shared<GameScene>();
+    Scenes::game->load();
+
+    GameSystem::setActiveScene(Scenes::menu);
+
+    //sf::Music music;
+    //if (!music.openFromFile("Media/__rhodesmas__music-loop.wav")) {
+    //    std::cerr << "Failed to load music\n";
+    //    return 1;
+    //}
+    //music.setLoop(true);
+    //music.play();
+
 
     sf::Clock clock;
 
-    while (window.isOpen()) {
+    while (window.isOpen() && !GameSystem::shouldQuit()) {
         sf::Time dt = clock.restart();
 
         sf::Event event;
@@ -25,7 +48,5 @@ int main() {
         window.display();
     }
 
-    initBackgroundMusic();
-    delete currentScene;
     return 0;
 }

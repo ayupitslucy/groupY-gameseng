@@ -2,22 +2,19 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
+#include <string>
+#include "engine/scene.h"
+#include "tower.h"
+#include "button.h"
+#include "TowerMenu.h"
 
 // Forward declarations
-class Tower;
 class Enemy;
 class Projectile;
 
-// ============================================================================
-// BASE SCENE CLASS
-// ============================================================================
-class Scene {
-public:
-    virtual ~Scene() = default;
-
-    virtual void handleEvent(sf::Event& event) = 0;
-    virtual void update(sf::Time delta) = 0;
-    virtual void draw(sf::RenderWindow& window) = 0;
+struct Scenes {
+    static std::shared_ptr<Scene> menu;
+    static std::shared_ptr<Scene> game;
 };
 
 // ============================================================================
@@ -27,13 +24,15 @@ class MenuScene : public Scene {
 public:
     MenuScene();
 
-    void handleEvent(const sf::Event& event) override;
-    void update(sf::Time delta) override;
-    void draw(sf::RenderWindow& window) override;
+    void handleEvent(const sf::Event& event);
+    void update(sf::Time delta);
+    void draw(sf::RenderWindow& window);
+    virtual void load() {}
 
 private:
     sf::Font font;
     sf::Text title;
+    sf::Text enter;
 };
 
 // ============================================================================
@@ -42,29 +41,41 @@ private:
 class GameScene : public Scene {
 public:
     GameScene();
-
-    void handleEvent(const sf::Event& event) override; // FIXED
-    void update(sf::Time delta) override;
+    void load() override;
+    void unload() override;
+    void handleEvent(const sf::Event& event) override;
+    void update(sf::Time dt) override;
     void draw(sf::RenderWindow& window) override;
 
 private:
-    // Gameplay objects
     std::vector<std::shared_ptr<Tower>> towers;
     std::vector<std::shared_ptr<Enemy>> enemies;
     std::vector<std::shared_ptr<Projectile>> projectiles;
 
-    // Player example
+    TowerMenu towerMenu;
+    std::vector<std::shared_ptr<Button>> towerButtons;
+    bool towerMenuOpen = false;
+    const TowerStats* selectedTower = nullptr;
+    int selectedTowerCost = 0;
+
+    sf::CircleShape previewShape;
     sf::CircleShape player;
 
-    // Tower placement preview
-    sf::CircleShape previewShape;
+    sf::Font moneyFont;
+    sf::Text moneyText;
 
-    // Enemy spawn timing
     sf::Time spawnTimer;
     sf::Time spawnDelay;
 
-private:
+    int lives = 20;
+    int money = 100;
+
     void spawnEnemy();
     void handleCollisions();
     bool can_place_turret(sf::Vector2f mousePos);
+
+    std::shared_ptr<Button> menuButton;
+
+    void initTowerButtons();
+
 };
