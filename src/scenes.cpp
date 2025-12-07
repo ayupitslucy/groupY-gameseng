@@ -25,6 +25,11 @@ MenuScene::MenuScene() {
     title.setString("Main Menu");
     title.setCharacterSize(50);
     title.setPosition(100.f, 100.f);
+
+    enter.setFont(font);
+    enter.setString("Press Enter To Continue");
+    enter.setCharacterSize(30);
+    enter.setPosition(100.f, 250.f);
 }
 
 void MenuScene::handleEvent(const sf::Event& event) {
@@ -36,7 +41,10 @@ void MenuScene::handleEvent(const sf::Event& event) {
 }
 
 void MenuScene::update(sf::Time delta) {}
-void MenuScene::draw(sf::RenderWindow& window) { window.draw(title); }
+void MenuScene::draw(sf::RenderWindow& window) { 
+    window.draw(title);
+    window.draw(enter);
+}
 
 // ============================================================================
 // GAME SCENE
@@ -77,8 +85,8 @@ void GameScene::load() {
     // Money text
     moneyText.setFont(moneyFont);
     moneyText.setCharacterSize(24);
-    moneyText.setFillColor(sf::Color::Yellow);
-    moneyText.setPosition(10.f, 10.f);
+    moneyText.setFillColor(sf::Color::Blue);
+    moneyText.setPosition(500.f, 10.f);
 
     // Player
    // player.setRadius(25.f);
