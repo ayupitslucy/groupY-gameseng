@@ -1,5 +1,5 @@
-project(setup)
 cmake_minimum_required(VERSION 3.11)
+project(setup)
 # Require modern C++
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,10 +20,11 @@ add_library(engine STATIC engine/game_system.cpp engine/scene.cpp engine/entity_
 target_include_directories(engine PUBLIC engine)
 target_link_libraries(engine sfml-graphics sfml-audio)
 
-add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
+####Copy all resources via Custom CMake Target####
+add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND} 
   -E copy_directory
     "${PROJECT_SOURCE_DIR}/res"
-    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/res
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/res
 )
 
 #### Copy OpenAL DLL ####
@@ -34,9 +35,24 @@ add_custom_target(copy_openal_dll ALL COMMAND ${CMAKE_COMMAND}
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 )
 
-#### Tower Defence Game
+#### Tower Defence Game ####
 add_executable(td_game src/main.cpp src/scenes.cpp src/components.cpp "src/sound.cpp" "src/tower.cpp" "src/tower.h" "src/enemy.h" "src/enemy.cpp" "src/projectile.cpp" "src/projectile.h"  "src/game_entities.cpp" "src/button.h" "src/InGameMenu.cpp" "src/TowerMenu.h" "src/TowerMenu.cpp" "src/button.cpp")
 target_include_directories(td_game PRIVATE ${SFML_INCS} .)
 target_link_libraries(td_game engine sfml-graphics sfml-audio)
+
+#### Copy res/ directory to the runtime output directory (usually build/) ####
+add_custom_command(TARGET td_game POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/res
+            $<TARGET_FILE_DIR:td_game>/res
+)
+
+####change working directory####
+set_target_properties(td_game   
+    PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
+)
+
+####dependencies to resource####
 add_dependencies(td_game copy_resources)
 add_dependencies(td_game copy_openal_dll)
