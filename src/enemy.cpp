@@ -24,12 +24,12 @@ bool Enemy::loadTextures()
         std::cerr << "[WARN] fast texture failed to load (res/icons_png/toast.png)\n";
     }
 
-    if (normalTex.loadFromFile("res/icons_png/egg.png")) {
+    if (normalTex.loadFromFile("res/icons_png/sausageX3.png")) {
         std::cout << "[OK] normal texture loaded\n";        // debugging stuff
         anyLoaded = true;
     }
     else {
-        std::cerr << "[WARN] normal texture failed to load (res/icons_png/egg.png)\n";
+        std::cerr << "[WARN] normal texture failed to load (res/icons_png/sausageX3.png)\n";
     }
 
     if (tankTex.loadFromFile("res/icons_png/bacon.png")) {
