@@ -3,6 +3,7 @@
 #include <fstream>
 #include "renderer.h"
 #include <algorithm>
+#include <queue>
 
 std::unique_ptr<LevelSystem::Tile[]> LevelSystem::tiles;
 int LevelSystem::width;
@@ -100,32 +101,100 @@ void LevelSystem::_build_sprites() {
 }
 
 std::vector<sf::Vector2f> LevelSystem::get_path() {
-    std::vector<sf::Vector2f> path;
-
-    // START
+    //  Locate START and END
     auto starts = find_tiles(START);
+    auto ends   = find_tiles(END);
+
     if (starts.size() != 1)
         throw std::runtime_error("Level must contain exactly ONE START tile.");
-
-    path.push_back(get_screen_coord_at_grid_coord(starts[0]));
-
-    // WAYPOINTS
-    auto wps = find_tiles(WAYPOINT);
-
-    std::sort(wps.begin(), wps.end(), [](auto& a, auto& b) {
-        if (a.y == b.y) return a.x < b.x;
-    return a.y < b.y;
-        });
-
-    for (auto& wp : wps)
-        path.push_back(get_screen_coord_at_grid_coord(wp));
-
-    // END
-    auto ends = find_tiles(END);
     if (ends.size() != 1)
         throw std::runtime_error("Level must contain exactly ONE END tile.");
 
-    path.push_back(get_screen_coord_at_grid_coord(ends[0]));
+    sf::Vector2i start = starts[0];
+    sf::Vector2i goal  = ends[0];
+
+    const int w = width;
+    const int h = height;
+
+    auto index = [w](sf::Vector2i p) {
+        return p.y * w + p.x;
+    };
+
+    //  Breadth First search setup
+    std::vector<int> prev(w * h, -1);   // store predecessor index
+    std::queue<sf::Vector2i> q;
+
+    auto inBounds = [w, h](sf::Vector2i p) {
+        return p.x >= 0 && p.x < w && p.y >= 0 && p.y < h;
+    };
+
+    auto isWalkable = [](Tile t) {
+        return t == EMPTY || t == START || t == END || t == WAYPOINT;
+    };
+
+    q.push(start);
+    prev[index(start)] = index(start);   // mark as visited with self
+
+    const sf::Vector2i dirs[4] = {
+        { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }
+    };
+
+    bool found = false;
+
+    // BFS loop
+    while (!q.empty() && !found) {
+        sf::Vector2i cur = q.front();
+        q.pop();
+
+        for (auto d : dirs) {
+            sf::Vector2i nxt = cur + d;
+
+            if (!inBounds(nxt))
+                continue;
+
+            if (!isWalkable(get_tile_at_grid_coord(nxt)))
+                continue;
+
+            int ni = index(nxt);
+            if (prev[ni] != -1)
+                continue;   // already visited
+
+            prev[ni] = index(cur);
+
+            if (nxt == goal) {
+                found = true;
+                break;
+            }
+
+            q.push(nxt);
+        }
+    }
+
+    if (!found) {
+        throw std::runtime_error("No path from START to END in level!");
+    }
+
+    // Reconstruct grid path from END to START
+    std::vector<sf::Vector2i> gridPath;
+    sf::Vector2i cur = goal;
+    int curIdx = index(cur);
+
+    while (true) {
+        gridPath.push_back(cur);
+        if (cur == start) break;
+
+        curIdx = prev[curIdx];
+        cur = { curIdx % w, curIdx / w };
+    }
+
+    std::reverse(gridPath.begin(), gridPath.end());
+
+    // Convert grid coords - screen coords (centre of each tile)
+    std::vector<sf::Vector2f> path;
+    path.reserve(gridPath.size());
+    for (auto& p : gridPath) {
+        path.push_back(get_screen_coord_center_at_grid_coord(p));
+    }
 
     return path;
 }

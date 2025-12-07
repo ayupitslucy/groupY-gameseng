@@ -81,13 +81,13 @@ void GameScene::load() {
     moneyText.setPosition(10.f, 10.f);
 
     // Player
-    player.setRadius(25.f);
-    player.setFillColor(sf::Color::Red);
-    player.setOrigin(player.getRadius(), player.getRadius());
-    player.setPosition(200.f, 200.f);
+   // player.setRadius(25.f);
+    //player.setFillColor(sf::Color::Red);
+    //player.setOrigin(player.getRadius(), player.getRadius());
+    //player.setPosition(200.f, 200.f);
 
     // Preview shape
-    previewShape.setFillColor(sf::Color(255, 0, 0, 120));
+    //previewShape.setFillColor(sf::Color(255, 0, 0, 120));
 
     // MENU BUTTON
     menuButton = std::make_shared<Button>(
@@ -172,7 +172,7 @@ bool GameScene::can_place_turret(sf::Vector2f mousePos) {
         grid.y >= LevelSystem::get_height())
         return false;
 
-    return LevelSystem::get_tile_at_grid_coord(grid) == LevelSystem::EMPTY;
+    return LevelSystem::get_tile_at_grid_coord(grid) == LevelSystem::WALL;
 }
 
 void GameScene::spawnEnemy() {
@@ -279,7 +279,7 @@ void GameScene::handleEvent(const sf::Event& event) {
                 int(mousePos.x / LevelSystem::get_tile_size()),
                 int(mousePos.y / LevelSystem::get_tile_size())
             );
-            sf::Vector2f placePos = LevelSystem::get_screen_coord_at_grid_coord(gridPos);
+            sf::Vector2f placePos = LevelSystem::get_screen_coord_center_at_grid_coord(gridPos);
 
             towers.push_back(std::make_shared<Tower>(placePos, *selectedTower));
             money -= selectedTowerCost;
@@ -322,18 +322,23 @@ void GameScene::update(sf::Time delta) {
                        mouseGrid.x >= LevelSystem::get_width() || mouseGrid.y >= LevelSystem::get_height());
 
     if (gridValid)
-        previewPos = LevelSystem::get_screen_coord_at_grid_coord(mouseGrid);
+        previewPos = LevelSystem::get_screen_coord_center_at_grid_coord(mouseGrid);
 
-    previewShape.setRadius(LevelSystem::get_tile_size() * 0.5f);
+    previewShape.setRadius(LevelSystem::get_tile_size() * 0.3f);
     previewShape.setOrigin(previewShape.getRadius(), previewShape.getRadius());
     previewShape.setPosition(previewPos);
 
+    bool validTile = gridValid &&
+    LevelSystem::get_tile_at_grid_coord(mouseGrid) == LevelSystem::WALL; //checking if tile is a wall
+
+    bool canPlaceNow = validTile && selectedTower && money >= selectedTowerCost;   //check if it can be place now
+
     bool allowed = selectedTower && gridValid &&
-                   LevelSystem::get_tile_at_grid_coord(mouseGrid) == LevelSystem::EMPTY &&
+                   LevelSystem::get_tile_at_grid_coord(mouseGrid) == LevelSystem::WALL &&
                    money >= selectedTowerCost;
 
     previewShape.setFillColor(
-        allowed ? sf::Color(0, 255, 0, 120) : sf::Color(255, 0, 0, 120)
+        validTile ? sf::Color(0, 255, 0, 120) : sf::Color(255, 0, 0, 120)
     );
 
     moneyText.setString("Money: " + std::to_string(money));

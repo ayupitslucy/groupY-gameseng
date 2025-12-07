@@ -12,10 +12,10 @@ Tower::Tower(const sf::Vector2f& worldPos, const TowerStats& stats)
     // Snap to grid
     gridPosition.x = int(worldPos.x / LevelSystem::get_tile_size());
     gridPosition.y = int(worldPos.y / LevelSystem::get_tile_size());
-    position = LevelSystem::get_screen_coord_at_grid_coord(gridPosition);
+    position = LevelSystem::get_screen_coord_center_at_grid_coord(gridPosition);
 
     baseShape.setRadius(20.f);
-    baseShape.setOrigin(20.f, 20.f);
+    baseShape.setOrigin(baseShape.getRadius(), baseShape.getRadius());
     baseShape.setFillColor(sf::Color::Blue);
     baseShape.setPosition(position);
 }

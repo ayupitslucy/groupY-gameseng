@@ -1,7 +1,7 @@
-s++++++
-w     +
-w www +
-w w w +
-w wwww+
-w     +
-wwwww e
+wswwwww
+w+   +w
+wwwww+w
+w+   +w
+w+wwwww
+w+   +w
+wwwwwew

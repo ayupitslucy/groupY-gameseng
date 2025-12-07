@@ -1,12 +1,7 @@
-s+++++++++w
-w   w    +w
-w w w w  +w
-w   w w  +w
-w w w w  +w
-w   w    +w
-w w w w  +w
-w   w    +w
-w w w w  +w
-w        +w
-w w w w  +w
-wwwwwwwww+e
+wwwswww
+www www
+w+ +www
+w wwwww
+w+   +w
+wwwww+w
+e    +w
