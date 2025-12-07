@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+3ff3da37312efb1e0cb71f473699d51c CMakeFiles/copy_openal_dll
+e12f9d95e7abcc1ae8f3882da1a800fa CMakeFiles/copy_resources
